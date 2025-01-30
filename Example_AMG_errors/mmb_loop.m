@@ -6,7 +6,7 @@
  
 
 run_time_reps=1;
-addpath('C:\dynare\5.1\matlab')
+addpath('C:\dynare\6.2\matlab')
 addpath('algorithm')
 [~, ~, ~] = mkdir('Results');
 
@@ -16,23 +16,29 @@ addpath(pwd)
 
 addpath([YourPath '\..\Utilities'])
 
-% MTCHANGE: replaced the code below to produce cell array of character
+% MTCHANGE: replace the code below to produce cell array of character
 % vectors mmb_vec by the two lines below of that, table 'overview_out.xlsx'
 % replaces the 'mmb_names.txt' file
 
 % % %fileID = fopen('mmb_test.txt','r');
 % % fileID = fopen('mmb_names.txt','r');
 % % mmbline = fgetl(fileID);        
-% % %geht hier vielleicht auch besser (ff. 5 Zeilen von mathworks-website)
+% % % maybe it works better here (ff. 5 lines from the mathworks-website)
 % % mmb_vec = cell(0,1);            
 % % while ischar(mmbline)           
 % %     mmb_vec{end+1,1} = mmbline; 
 % %     mmbline = fgetl(fileID);    
 % % end    
 
+% Create Excel-File with actual Models
+Github_Rep_Information = webread('https://api.github.com/repos/MiriamDietenberger/Rep-MMB/contents/Rep-MMB?ref=main');
+model_name = {Github_Rep_Information.name}';
+model_folder_exists = ones(numel(model_name),1);
+Table_Excel = table(model_name, model_folder_exists);
+writetable(Table_Excel, 'overview_out.xlsx');
+
 ot = readtable('overview_out.xlsx');
 mmb_vec= ot.model_name(logical(ot.model_folder_exists));
-
 
 loop_n=size(mmb_vec,1);
 % MTCHANGE: preallocate with nan instead of zeros
@@ -106,6 +112,6 @@ end
 ot = movevars(ot,"error","After","copyexitstatus");
 ot = movevars(ot,"error_flag","After","error");
 writetable(ot,'Results\Result_allmodels.xlsx','Sheet','Info');
-% MTCHANGE: save results outside of the foor loop
+% MTCHANGE: save results outside of the for loop
 clearvars -except AMG_Results YourPath mmb_vec run_time_reps newton_options
 save([YourPath '\results\AMG_Results_worked'])
